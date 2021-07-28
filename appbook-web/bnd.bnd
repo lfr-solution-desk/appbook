@@ -1,0 +1,5 @@
+Bundle-Name: appbook-web
+Bundle-SymbolicName: com.liferay.training.appbook.web
+Bundle-Version: 1.0.0
+Export-Package: com.liferay.training.appbook.web.constants
+-metatype: *

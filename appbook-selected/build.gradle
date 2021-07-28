@@ -1,0 +1,7 @@
+dependencies {
+	compileOnly group: "com.liferay.portal", name: "release.dxp.api"
+	compileOnly project(":modules:appbook:appbook-api")
+	compileOnly project(":modules:appbook:appbook-service")
+
+	cssBuilder group: "com.liferay", name: "com.liferay.css.builder"
+}
