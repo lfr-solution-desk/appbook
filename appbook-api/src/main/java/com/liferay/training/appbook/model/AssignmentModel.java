@@ -423,4 +423,7 @@ public interface AssignmentModel
 	@Override
 	public boolean isScheduled();
 
+	@Override
+	public Assignment cloneWithOriginalValues();
+
 }

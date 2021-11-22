@@ -30,6 +30,7 @@ import com.liferay.portal.kernel.service.UserLocalServiceUtil;
 import com.liferay.portal.kernel.util.GetterUtil;
 import com.liferay.portal.kernel.util.PortalUtil;
 import com.liferay.portal.kernel.util.ProxyUtil;
+import com.liferay.portal.kernel.util.StringUtil;
 import com.liferay.portal.kernel.workflow.WorkflowConstants;
 import com.liferay.training.appbook.model.Assignment;
 import com.liferay.training.appbook.model.AssignmentModel;
@@ -40,6 +41,7 @@ import java.io.Serializable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 
+import java.sql.Blob;
 import java.sql.Types;
 
 import java.util.ArrayList;
@@ -49,6 +51,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -884,7 +887,9 @@ public class AssignmentModelImpl
 		for (Map.Entry<String, Object> entry :
 				_columnOriginalValues.entrySet()) {
 
-			if (entry.getValue() != getColumnValue(entry.getKey())) {
+			if (!Objects.equals(
+					entry.getValue(), getColumnValue(entry.getKey()))) {
+
 				_columnBitmask |= _columnBitmasks.get(entry.getKey());
 			}
 		}
@@ -943,6 +948,43 @@ public class AssignmentModelImpl
 		assignmentImpl.setStatusDate(getStatusDate());
 
 		assignmentImpl.resetOriginalValues();
+
+		return assignmentImpl;
+	}
+
+	@Override
+	public Assignment cloneWithOriginalValues() {
+		AssignmentImpl assignmentImpl = new AssignmentImpl();
+
+		assignmentImpl.setUuid(this.<String>getColumnOriginalValue("uuid_"));
+		assignmentImpl.setAssignmentId(
+			this.<Long>getColumnOriginalValue("assignmentId"));
+		assignmentImpl.setGroupId(this.<Long>getColumnOriginalValue("groupId"));
+		assignmentImpl.setCompanyId(
+			this.<Long>getColumnOriginalValue("companyId"));
+		assignmentImpl.setUserId(this.<Long>getColumnOriginalValue("userId"));
+		assignmentImpl.setUserName(
+			this.<String>getColumnOriginalValue("userName"));
+		assignmentImpl.setCreateDate(
+			this.<Date>getColumnOriginalValue("createDate"));
+		assignmentImpl.setModifiedDate(
+			this.<Date>getColumnOriginalValue("modifiedDate"));
+		assignmentImpl.setTitle(this.<String>getColumnOriginalValue("title"));
+		assignmentImpl.setArticleId(
+			this.<Long>getColumnOriginalValue("articleId"));
+		assignmentImpl.setDescription(
+			this.<String>getColumnOriginalValue("description"));
+		assignmentImpl.setIconType(
+			this.<String>getColumnOriginalValue("iconType"));
+		assignmentImpl.setDueDate(this.<Date>getColumnOriginalValue("dueDate"));
+		assignmentImpl.setStatus(
+			this.<Integer>getColumnOriginalValue("status"));
+		assignmentImpl.setStatusByUserId(
+			this.<Long>getColumnOriginalValue("statusByUserId"));
+		assignmentImpl.setStatusByUserName(
+			this.<String>getColumnOriginalValue("statusByUserName"));
+		assignmentImpl.setStatusDate(
+			this.<Date>getColumnOriginalValue("statusDate"));
 
 		return assignmentImpl;
 	}
@@ -1125,7 +1167,7 @@ public class AssignmentModelImpl
 			getAttributeGetterFunctions();
 
 		StringBundler sb = new StringBundler(
-			(4 * attributeGetterFunctions.size()) + 2);
+			(5 * attributeGetterFunctions.size()) + 2);
 
 		sb.append("{");
 
@@ -1136,9 +1178,26 @@ public class AssignmentModelImpl
 			Function<Assignment, Object> attributeGetterFunction =
 				entry.getValue();
 
+			sb.append("\"");
 			sb.append(attributeName);
-			sb.append("=");
-			sb.append(attributeGetterFunction.apply((Assignment)this));
+			sb.append("\": ");
+
+			Object value = attributeGetterFunction.apply((Assignment)this);
+
+			if (value == null) {
+				sb.append("null");
+			}
+			else if (value instanceof Blob || value instanceof Date ||
+					 value instanceof Map || value instanceof String) {
+
+				sb.append(
+					"\"" + StringUtil.replace(value.toString(), "\"", "'") +
+						"\"");
+			}
+			else {
+				sb.append(value);
+			}
+
 			sb.append(", ");
 		}
 

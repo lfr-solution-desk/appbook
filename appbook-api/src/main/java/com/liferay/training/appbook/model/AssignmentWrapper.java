@@ -169,6 +169,11 @@ public class AssignmentWrapper
 		}
 	}
 
+	@Override
+	public Assignment cloneWithOriginalValues() {
+		return wrap(model.cloneWithOriginalValues());
+	}
+
 	/**
 	 * Returns the article ID of this assignment.
 	 *
